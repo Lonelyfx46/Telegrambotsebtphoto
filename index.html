@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send to Telegram</title>
+</head>
+<body>
+  <h2>Select and Send Photo</h2>
+
+  <!-- Select Button -->
+  <input type="file" id="fileInput" accept="image/*">
+  <br><br>
+
+  <!-- Preview -->
+  <img id="preview" width="200" style="display:none; border:1px solid #ccc; border-radius:8px;"><br><br>
+
+  <!-- Send Button -->
+  <button id="sendBtn" disabled>Send to Telegram</button>
+
+  <script>
+    const TOKEN = "7865121878:AAHgj10aM-GLn-xET-uwPweFb3S9rmCSJhE";   // <-- Replace with your bot token
+    const CHAT_ID = "7890542447";   // <-- Replace with your chat id
+
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    const sendBtn = document.getElementById("sendBtn");
+    let selectedFile = null;
+
+    // Preview image after selection
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          sendBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Send to Telegram
+    sendBtn.addEventListener("click", async () => {
+      if (!selectedFile) return;
+
+      const url = `https://api.telegram.org/bot${TOKEN}/sendPhoto`;
+      const formData = new FormData();
+      formData.append("chat_id", CHAT_ID);
+      formData.append("photo", selectedFile);
+
+      try {
+        const res = await fetch(url, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.ok) {
+          alert("✅ Sent to Telegram successfully!");
+        } else {
+          alert("❌ Error: " + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert("Upload failed: " + err);
+      }
+    });
+  </script>
+</body>
+</html>
